@@ -6,6 +6,8 @@ Ghetto random ip generation, ripped from scantehnet.
 Building
 --------
 
+On Linux:
+
 ```
 git clone https://github.com/bls/ipgen.git
 cd ipgen
@@ -13,6 +15,13 @@ sudo apt-get install make build-essential liblog4cpp5-dev \
     libboost-program-options-dev libssl-dev
 make
 ```
+
+On OSX, you would install dependencies with homebrew instead of apt:
+
+```
+brew install boost log4cpp
+```
+
 
 Quickstart
 ----------
@@ -58,9 +67,9 @@ About
 -----
 
 The code is a lot heavier than it really needs to be; it was ripped out of a larger
-project (scantehnet).  It's pretty inefficient (bogons list is searched linearly),
-so it takes about an hour to generate a full permutation of IPv4 on a wimpy Atom CPU. 
-That turned out to be good enough for our purposes.
+project (scantehnet).  It's pretty inefficient (bogons list is searched linearly)
+so it takes about an hour to generate a full permutation of IPv4 on a 2011 macbook.
+That turned out to be OK for our purposes.
 
 If you just want a few random IP addresses, mini_ipgen.py might be easier to use.
 
