@@ -17,7 +17,7 @@
 
 #Utah State University - http://singsing.usu.edu/ro_single.php?id=16757
 #They actually pay attention and complain
-129.123.0.0/225.225.0.0
+129.123.0.0/255.255.0.0
 
 #AT&T Hosting and Application Services
 #didn't reply to emails - 16/12/11
