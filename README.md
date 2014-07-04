@@ -62,6 +62,8 @@ project (scantehnet).  It's pretty inefficient (bogons list is searched linearly
 so it takes about 8 hours to generate a full permutation of IPv4 on a wimpy Atom CPU. 
 That turned out to be plenty good enough for our purposes.
 
+If you just want a few random IP addresses, mini_ipgen.py might be easier to use.
+
 How it works
 ------------
 
