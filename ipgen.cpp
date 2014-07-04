@@ -89,10 +89,12 @@ int main(int argc, char **argv)
 
   // Load bogons and state
   IPEnumerator ip_enum(key, bogons_file.c_str());
-  if(!ip_enum.restore_state(state_file)) {
-    LOG4CPP_NOTICE_SD() << "no state; starting from scratch";
-  } else {
-    LOG4CPP_NOTICE_SD() << "resuming from saved state file";
+  if(save_state_every > 0) {
+    if(!ip_enum.restore_state(state_file)) {
+      LOG4CPP_NOTICE_SD() << "no state; starting from scratch";
+    } else {
+      LOG4CPP_NOTICE_SD() << "resuming from saved state file";
+    }
   }
   
   // Generate IPs

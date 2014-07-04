@@ -81,7 +81,7 @@ IPEnumerator::restore_state(const char *filename)
 {
   int fd = open(filename, 0, O_RDONLY);
   if(fd == -1) {
-    LOG4CPP_ERROR_SD() << "failed to load state from file: '" 
+    LOG4CPP_WARN_SD() << "failed to load state from file: '" 
 		       << filename << "': " 
 		       << strerror(errno);
     return false;
