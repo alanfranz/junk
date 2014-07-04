@@ -17,12 +17,10 @@ def random_ips(num, bogons_file=None):
                 net = netaddr.IPNetwork(line, implicit_prefix=False, version=4)
                 bogon_networks.append(net)
     bogon_ipset = netaddr.IPSet(bogon_networks)
-    print bogon_ipset
 
     # Generate IPs
     ips = set()
     while len(ips) < num:
-        print len(ips)
         x = random.randint(0, 0xFFFFFFFF)
         ip = netaddr.IPAddress(x)
         if ip not in bogon_ipset:
