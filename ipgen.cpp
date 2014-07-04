@@ -103,6 +103,7 @@ int main(int argc, char **argv)
     uint32_t ip = ip_enum.next();
     std::cout << ip2str(ip) << std::endl;
     if(ip == ip_enum.end()) {
+        LOG4CPP_INFO_SD() << "Exhausted IP space";
         break;
     }
     count++;
@@ -120,6 +121,6 @@ int main(int argc, char **argv)
     }
   }
 
-  LOG4CPP_ALERT_SD() << "Scan complete!";
+  LOG4CPP_ALERT_SD() << "done, " << count << " ips emitted.";
 }
 
