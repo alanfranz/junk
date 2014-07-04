@@ -39,9 +39,9 @@ bls@zxc:~/wa/ipgen$ time ./ipgen -k myScanKey -n 5000000 > my_ips
 1404444793 NOTICE ipgen : progress: 5 million...
 1404444793 ALERT ipgen : done, 5000000 ips emitted.
 
-real    1m33.770s
-user    0m47.219s
-sys     0m46.171s
+real	0m5.605s
+user	0m5.480s
+sys	0m0.123s
 
 bls@zxc:~/wa/ipgen$ wc -l my_ips 
 5000000 my_ips

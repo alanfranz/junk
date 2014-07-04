@@ -96,12 +96,16 @@ int main(int argc, char **argv)
       LOG4CPP_NOTICE_SD() << "resuming from saved state file";
     }
   }
-  
+
   // Generate IPs
   long count = 0;
+
   while(1) {
     uint32_t ip = ip_enum.next();
-    std::cout << ip2str(ip) << std::endl;
+    
+    // std::cout << ip2str(ip) << std::endl;
+    puts(ip2str(ip).c_str());
+
     if(ip == ip_enum.end()) {
         LOG4CPP_INFO_SD() << "Exhausted IP space";
         break;

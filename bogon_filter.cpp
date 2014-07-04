@@ -63,10 +63,10 @@ BogonFilter::contains(uint32_t ip) const
   std::vector<NetBlock>::const_iterator it;
   for(it = netblocks_.begin(); it != netblocks_.end(); ++it) {
     if(it->contains(ip)) {
-      LOG4CPP_DEBUG_SD() << "matched: " << ip2str(ip);
+      // LOG4CPP_DEBUG_SD() << "matched: " << ip2str(ip);
       return true;
     }
   }
-  LOG4CPP_DEBUG_SD() << "did not match: " << ip2str(ip);
+  // LOG4CPP_DEBUG_SD() << "did not match: " << ip2str(ip);
   return false;
 }
