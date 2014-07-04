@@ -3,6 +3,13 @@ ipgen
 
 Ghetto random ip generation, ripped from scantehnet. 
 
+About
+-----
+
+ipgen - IP generation logic from scantehnet.
+
+Usage: 
+
 Installation
 ------------
 

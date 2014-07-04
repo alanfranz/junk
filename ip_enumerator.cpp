@@ -16,7 +16,7 @@ IPEnumerator::IPEnumerator(uint8_t *key, std::string bogon_file)
   memcpy(key_, key, sizeof(key_));
   if(!filter_.load(bogon_file)) {
     LOG4CPP_ERROR_SD() << "failed to load: " << bogon_file;
-    // TODO: throw here, or otherwise fuck out in some way.
+    // TODO: should fail here...
   }
   LOG4CPP_NOTICE_SD() << "loaded: " << bogon_file;
 }
