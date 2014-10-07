@@ -9,7 +9,6 @@ Building
 On Linux:
 
 ```
-git clone https://github.com/bls/ipgen.git
 cd ipgen
 sudo apt-get install make build-essential liblog4cpp5-dev \
     libboost-program-options-dev libssl-dev
