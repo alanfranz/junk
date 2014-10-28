@@ -35,6 +35,7 @@ cp -r /usr/share/locale /srv/repo/usr/share/
 # Apache configuration
 cp /vagrant/repo-ssl.conf /etc/apache2/sites-available
 cp /vagrant/ports.conf /etc/apache2
+cp /vagrant/BANNER.html /srv/repo/data
 
 a2disconf serve-cgi-bin
 a2dissite 000-default
@@ -53,8 +54,9 @@ ufw allow 22/tcp
 ufw allow 443/tcp
 ufw --force enable
 
-# Create a "customer"
-useradd -g customer -s /bin/bash -d /srv/repo acmecorp
+# Create a "customer". Note that home directory must
+# be set relative to the chroot.
+useradd -g customer -s /bin/bash -d / acmecorp
 chpasswd <<EOM
 acmecorp:what@ever
 EOM

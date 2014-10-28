@@ -15,7 +15,6 @@ use constant RSYNC => '/usr/bin/rsync';
 use constant LOGFILE => 'rrsync.log';
 
 my $Usage = <<EOM;
-Use 'command="rsync [-ro] SUBDIR"'
 EOM
 
 our $ro = (@ARGV && $ARGV[0] eq '-ro') ? shift : '';	# -ro = Read-Only
