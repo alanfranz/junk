@@ -1,0 +1,6 @@
+*.pyc
+project.wpu
+.coverage
+*.egg-info
+.tox
+.DS_Store

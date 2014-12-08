@@ -1,0 +1,194 @@
+#!/usr/bin/env python
+
+import sys, os, argh, argparse
+from argh.decorators import arg
+import logging, pprint
+import dmt
+
+log = logging.getLogger(__name__)
+
+def which_containers(project, names, all_flag, recursive_flag):
+    """Return a list of containers selected by the user."""
+    if names:
+        container_list = []
+        for n in names:
+            if project.is_container_group(n):
+                container_list.extend(project.container_group(n))
+            else:
+                container_list.append(n)
+        return container_list                
+    elif all_flag:
+        return project.all_container_names()
+    elif recursive_flag:
+        return project.get_container_names_under_here() 
+    else:
+        return [project.get_container_name_here()]
+
+def intersect(a, b):
+    return list(set(a) & set(b))
+
+@arg('-f', '--force', default=False, action='store_true',
+     help='Force full rebuild (ignore docker cache)')
+@arg('-a', '--all', default=False, action='store_true',
+     help='Build all containers')
+@arg('-r', '--recursive', default=False, action='store_true')
+@arg('-p', '--parallel', default=False, action='store_true')
+@arg('-q', '--quiet', default=False, action='store_true',
+     help='Suppress verbose build output')
+@arg('container', default=None, nargs='*')
+def build(args):
+    """Build images."""
+    project = dmt.load_project()
+    builder = dmt.ContainerBuilder(project)
+    container_list = which_containers(project, args.container,
+                                      args.all, args.recursive)
+
+    for i, build_stage in enumerate(project.build_groups()):
+        to_build = intersect(container_list, build_stage)
+        if not to_build:
+            continue
+        log.info('Build stage: %s -> %s', i, build_stage)
+        if args.parallel:
+            builder.build_parallel(to_build, args.force, args.quiet)
+        else:
+            builder.build(to_build, args.force, args.quiet)
+
+def push(args):
+    """Push containers."""
+    raise NotImplementedError
+
+
+# dmt run / dmt run shell / dmt run debug
+@arg('-a', '--all', default=False, action='store_true')
+@arg('-d', '--dry-run', default=False, action='store_true')
+@arg('-r', '--recursive', default=False, action='store_true')
+@arg('container', default=None, nargs='*')
+def run(args):
+    """Run containers."""
+    project = dmt.load_project()
+    runner = dmt.ContainerRunner(project)
+    container_list = which_containers(project, args.container,
+                                      args.all, args.recursive)
+    if args.dry_run:
+        log.warn('Dry-run mode enabled; commands will not actually run')
+    runner.run(container_list, dry_run=args.dry_run)
+
+
+@arg('-n', '--no-ports', default=False, action='store_true')
+@arg('-c', '--command', default='/bin/sh')
+@arg('container', default=None, nargs=1)
+def debug(args):
+    """Debug a container."""
+    project = dmt.load_project()
+    runner = dmt.ContainerRunner(project)
+    runner.run(args.container, 
+               extra_args=['-i', '-t'],
+               run_cmd=[args.command],
+               debug=True)
+
+
+def print_container_details(project, container_name):
+    conf = project.get_container(container_name)
+    relpath = os.path.relpath(conf.dmt_file, project.top_dir)
+    inspector = dmt.ContainerInspector(project)
+    container_details = inspector.inspect(conf.name)
+
+    print "[%s]" % conf.name
+    print "  tag: %s" % conf.tag
+    print "  path: %s" % relpath
+    print "  image: %s" % container_details.image
+    print "  size: %s" % container_details.size
+    
+    print 
+
+
+@arg('container', default=None, nargs='*')
+@arg('-t', '--tree', default=False, action='store_true',
+     help='Show container dependency tree')
+@arg('-v', '--verbose', default=False, action='store_true',
+     help='Show container details')
+def info(args):
+    """Display project information."""
+    project = dmt.load_project()        
+
+    if args.tree:
+        depends = project.build_depends()
+        print "BUILD DEPENDS: %s" % depends
+        for group in project.build_groups():
+            print "BUILD GROUP: %s" % group
+    elif args.verbose:
+        names = args.container or project.all_container_names()
+        for name in names:
+            print_container_details(project, name)
+    else:
+        if not args.container:
+            for name in project.all_container_names():
+                print name
+        else:
+            for name in args.container:
+                print_container_details(project, name)
+
+
+def expand_cmd_aliases(args, cmds):
+    """Allow command aliases like "dmt r" for "dmt run", assuming that
+    what the user typed was not ambiguous. This is a workaround, since 
+    argh/argparse do not have command aliases in Python 2.x"""
+    try:
+        cmd_names = [x.__name__ for x in cmds]
+        candidates = [x for x in cmd_names if x.startswith(args[0])]
+        if len(candidates) == 1:
+            return [candidates[0]] + args[1:]
+    except IndexError:
+        pass
+    return args 
+    
+
+def main():
+    try:
+        cmds = [build, push, run, debug, info]
+        parser = argh.ArghParser()
+        parser.add_commands(cmds)
+        args = expand_cmd_aliases(sys.argv[1:], cmds)
+        parser.dispatch(args)
+    except dmt.error.ProjectNotFoundError, exc:
+        log.error("Project file '%s' not found", dmt.project.PROJECT_FILE)
+        sys.exit(1)
+    except dmt.error.NoContainerHereError, exc:
+        log.error("You specified a command (run, build, etc) which requires a container name.")
+        log.error("If one is not supplied, dmt will use the container definitions in the current")
+        log.error("directory. However, there are no container definitions here.")
+        sys.exit(1)
+    except dmt.error, exc:
+        if in_debug_mode():
+            log.exception('Fatal error: %s', exc.message)
+        else:
+            log.fatal('Fatal error: %s', exc.message)
+
+
+def in_debug_mode():
+    return 'DMTDEBUG' in os.environ
+
+
+if __name__ == '__main__':
+    if in_debug_mode():
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.INFO
+        
+    logging.basicConfig(level=loglevel)
+    main()
+
+
+
+# behavior is that it searches up for an environment / root
+# configuration file of some sort. forever, or not? 
+# or do you go...
+# dmt env blah ? 
+# and then the tool is stateful?
+# stateful tools are kind of cool
+# TODO: to handle image dependencies, would need to parse the Dockerfile
+# and then figure out what images depend on what other ones. Shoudl probaby
+# build them in dependency order if we can.
+
+# OK, so 1 container might have like, multiple configs referencing it!
+# Is that OK? Probably, right?
